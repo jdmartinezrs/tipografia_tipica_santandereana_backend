@@ -23,11 +23,10 @@
 `src/main/resources/application.properties`:
 ```properties
 spring.application.name=demo
-spring.datasource.url=jdbc:mysql://localhost:3306/casatipografiasantandereana?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota
-spring.datasource.username=Ficha_3234206
-spring.datasource.password=claveProyecto
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:postgresql://localhost:5433/tipografia_tipica_santander
+spring.datasource.username=juan_admin
+spring.datasource.password=contraseña aquí
+spring.jpa.hibernate.ddl-auto=validate
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 server.port=8080
@@ -35,21 +34,7 @@ server.port=8080
 
 ## APIs Desarrolladas
 
-### 1. API de Productos (Existente)
-**Controller**: `ProductoController.java`
-**Endpoints**:
-- `GET /api/productos` - Listar todos los productos
-- `GET /api/productos/{id}` - Obtener producto por ID
-- `POST /api/productos` - Crear nuevo producto
-- `PUT /api/productos/{id}` - Actualizar producto
-- `DELETE /api/productos/{id}` - Eliminar producto
-
-**Modelo**: `Producto.java`
-- `id` (Long) - Primary key
-- `nombre` (String, max 120 caracteres)
-- `precio` (BigDecimal, precision 12, scale 2)
-
-### 2. API de Tipografías (Nuevo)
+### API de Tipografías
 **Controller**: `TipografiaController.java`
 **Endpoints**:
 - `GET /api/tipografias` - Listar todas las tipografías
@@ -66,7 +51,7 @@ server.port=8080
 - `artista` (Artista) - Foreign key
 - `peso` (Peso) - Foreign key
 
-### 3. Entidades Relacionadas
+### Entidades Relacionadas
 
 #### Artista
 **Modelo**: `Artista.java`
@@ -94,16 +79,6 @@ server.port=8080
 - Convierte entre valores de enum y strings con espacios para la base de datos
 
 ## Estructura de Tablas en MySQL
-
-### Tabla producto
-```sql
-CREATE TABLE producto (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    nombre VARCHAR(120) NOT NULL,
-    precio DECIMAL(12,2) NOT NULL,
-    PRIMARY KEY (id)
-) ENGINE=InnoDB;
-```
 
 ### Tabla tipografia
 ```sql
@@ -170,7 +145,7 @@ cd demo
 
 ### Ver Base de Datos MySQL
 ```bash
-mysql -u Ficha_3234206 -p
+psql -U juan_admin -p 5433 -d tipografia_tipica_santander
 SHOW DATABASES;
 ```
 
@@ -181,13 +156,6 @@ taskkill //F //PID <PID>
 ```
 
 ## Endpoints Disponibles para Pruebas
-
-### Productos
-- **GET All**: `http://localhost:8080/api/productos`
-- **GET by ID**: `http://localhost:8080/api/productos/{id}`
-- **POST**: `http://localhost:8080/api/productos`
-- **PUT**: `http://localhost:8080/api/productos/{id}`
-- **DELETE**: `http://localhost:8080/api/productos/{id}`
 
 ### Tipografías
 - **GET All**: `http://localhost:8080/api/tipografias`
@@ -216,6 +184,6 @@ taskkill //F //PID <PID>
 ✅ Aplicación Spring Boot corriendo correctamente en puerto 8080
 ✅ Conexión a MySQL establecida y funcional
 ✅ Tablas creadas automáticamente por Hibernate (ddl-auto=update)
-✅ APIs de Productos y Tipografías disponibles
+✅ API de Tipografías disponible
 ✅ Conversión de enum con espacios implementada correctamente
 ✅ Listo para pruebas con Thunder Client

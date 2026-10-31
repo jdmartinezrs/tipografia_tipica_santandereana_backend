@@ -1,4 +1,4 @@
-package com.miproyecto.backend.model;
+package com.miproyecto.backend.tipografia.model;
 
 public enum CategoriaTipografia {
     SERIF("Serif"),
