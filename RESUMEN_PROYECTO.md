@@ -1,189 +1,41 @@
-# Resumen del Proyecto - Casa Tipografía Santandereana
+# Estado actual del proyecto
 
-## Fecha
-17 de Octubre de 2026
+Este documento resume la implementación vigente. Para instrucciones de instalación y ejecución, consultar [README.md](README.md). Para evaluación técnica y próximos pasos, consultar [ANALISIS_ARQUITECTURA.md](ANALISIS_ARQUITECTURA.md).
 
-## Inicio del Proyecto
+## Stack y ejecución
 
-### Configuración Inicial
-- **Ubicación del proyecto**: `C:\Users\Windows 10\Documents\juan\demo`
-- **Tecnología**: Spring Boot 4.1.1
-- **Java**: 25.0.4.1 (Eclipse Adoptium)
-- **Maven**: 3.10.0
-- **Build Tool**: Maven Wrapper (mvnw.cmd)
+- Java configurado en `pom.xml`: 21.
+- Spring Boot configurado en `pom.xml`: 4.1.1.
+- Persistencia: PostgreSQL con Spring Data JPA.
+- Esquema: Hibernate usa `ddl-auto=validate`; las tablas deben existir antes de iniciar.
+- Puerto HTTP: 8080.
+- Ejecución: Maven Wrapper (`.\mvnw.cmd spring-boot:run` en Windows).
 
-### Configuración de Base de Datos
-- **Motor**: MySQL 9.3
-- **Base de datos**: `casatipografiasantandereana`
-- **Usuario**: `Ficha_3234206`
-- **URL JDBC**: `jdbc:mysql://localhost:3306/casatipografiasantandereana?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota`
-- **Puerto de aplicación**: 8080
+## Estructura actual
 
-### Archivo de Configuración
-`src/main/resources/application.properties`:
-```properties
-spring.application.name=demo
-spring.datasource.url=jdbc:postgresql://localhost:5433/tipografia_tipica_santander
-spring.datasource.username=juan_admin
-spring.datasource.password=contraseña aquí
-spring.jpa.hibernate.ddl-auto=validate
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-server.port=8080
-```
+El código está organizado por dominio bajo `com.miproyecto.backend`:
 
-## APIs Desarrolladas
+- `tipografia`: controlador REST, DTOs, servicio, repositorio y entidades de tipografía, variante y archivo de fuente.
+- `artista`: CRUD REST con controlador, DTOs, servicio y repositorio.
+- `categoria` y `peso`: entidades y repositorios.
+- `compra`, `descarga`, `licencia` y `usuario`: entidades del dominio actualmente representadas en el código.
 
-### API de Tipografías
-**Controller**: `TipografiaController.java`
-**Endpoints**:
-- `GET /api/tipografias` - Listar todas las tipografías
-- `GET /api/tipografias/{id}` - Obtener tipografía por ID
-- `POST /api/tipografias` - Crear nueva tipografía
-- `PUT /api/tipografias/{id}` - Actualizar tipografía
-- `DELETE /api/tipografias/{id}` - Eliminar tipografía
+Los flujos implementados para tipografías y artistas se describen en README. La presencia de una entidad no implica que ya exista una API CRUD o un flujo de negocio para ese dominio.
 
-**Modelo**: `Tipografia.java`
-- `tipografiaId` (Integer) - Primary key
-- `nombre` (String, max 100 caracteres)
-- `precio` (BigDecimal, precision 10, scale 2)
-- `categoria` (Enum CategoriaTipografia)
-- `artista` (Artista) - Foreign key
-- `peso` (Peso) - Foreign key
+## Base de datos
 
-### Entidades Relacionadas
+La configuración de referencia está en `src/main/resources/application-example.properties`. Ajusta URL, usuario y contraseña por entorno. No guardar credenciales reales en el repositorio. El esquema debe corresponder a las entidades JPA; el proyecto no crea ni actualiza automáticamente las tablas.
 
-#### Artista
-**Modelo**: `Artista.java`
-- `artistaId` (Integer) - Primary key
-- `nombre` (String, max 100 caracteres)
+## Convenciones observadas
 
-**Repository**: `ArtistaRepository.java`
+- Controladores REST reciben DTOs, y usan Bean Validation donde está implementada.
+- Servicios coordinan operaciones y límites transaccionales.
+- Repositorios usan Spring Data JPA.
+- Las respuestas HTTP de catálogo no exponen directamente las entidades JPA.
 
-#### Peso
-**Modelo**: `Peso.java`
-- `pesoId` (Integer) - Primary key
-- `nombre` (String, max 50 caracteres)
+## Pendientes conocidos
 
-**Repository**: `PesoRepository.java`
-
-#### CategoriaTipografia (Enum)
-**Modelo**: `CategoriaTipografia.java`
-- `SERIF` ("Serif")
-- `SANS_SERIF` ("Sans Serif")
-- `SCRIPT` ("Script")
-- `DISPLAY` ("Display")
-- `MONOSPACE` ("Monospace")
-
-**Converter**: `CategoriaTipografiaConverter.java`
-- Convierte entre valores de enum y strings con espacios para la base de datos
-
-## Estructura de Tablas en MySQL
-
-### Tabla tipografia
-```sql
-CREATE TABLE tipografia (
-    tipografia_id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    precio DECIMAL(10,2) NOT NULL,
-    categoria VARCHAR(20) NOT NULL,
-    artista_id INT NOT NULL,
-    peso_id INT NOT NULL,
-    CONSTRAINT fk_tipografia_artista FOREIGN KEY (artista_id) REFERENCES Artista(artista_id),
-    CONSTRAINT fk_tipografia_peso FOREIGN KEY (peso_id) REFERENCES Peso(peso_id)
-) ENGINE=InnoDB;
-```
-
-### Tabla artista
-```sql
-CREATE TABLE artista (
-    artista_id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
-) ENGINE=InnoDB;
-```
-
-### Tabla peso
-```sql
-CREATE TABLE peso (
-    peso_id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL
-) ENGINE=InnoDB;
-```
-
-## Problemas Resueltos
-
-### 1. Nombre de Base de Datos
-**Problema**: El nombre de la base de datos en la configuración (`casatipografiaSantandereana`) no coincidía con el nombre real en MySQL (`casatipografiasantandereana` - todo minúsculas).
-
-**Solución**: Se corrigió el nombre en `application.properties` para coincidir exactamente con el nombre en MySQL.
-
-### 2. Permisos de Administrador
-**Problema**: Windows Firewall/Defender solicitaba permisos de administrador al intentar usar el puerto 8080.
-
-**Solución**: Se cambió el puerto a diferentes alternativas (8081, 8082, 8083, 9090) hasta encontrar uno disponible. Finalmente se mató el proceso en el puerto 8080 y se configuró la aplicación en ese puerto.
-
-### 3. Conversión de Enum con Espacios
-**Problema**: La base de datos tenía valores de categoría con espacios (ej: "Serif", "Sans Serif"), pero el enum Java inicial usaba mayúsculas sin espacios (SERIF, SANS_SERIF), causando error: `No enum constant com.miproyecto.backend.model.CategoriaTipografia.Serif`.
-
-**Solución**:
-- Se modificó el enum `CategoriaTipografia` para incluir nombres de display con espacios
-- Se creó un `AttributeConverter` (`CategoriaTipografiaConverter`) para manejar la conversión entre valores de la base de datos y el enum Java
-- Se configuró el converter con `@Converter(autoApply = true)` para aplicarse automáticamente
-
-## Comandos Ejecutados
-
-### Verificar Maven Wrapper
-```bash
-./mvnw.cmd -v
-```
-
-### Ejecutar Aplicación
-```bash
-cd demo
-./mvnw.cmd spring-boot:run
-```
-
-### Ver Base de Datos MySQL
-```bash
-psql -U juan_admin -p 5433 -d tipografia_tipica_santander
-SHOW DATABASES;
-```
-
-### Matar Proceso en Puerto
-```bash
-netstat -ano | findstr :8080
-taskkill //F //PID <PID>
-```
-
-## Endpoints Disponibles para Pruebas
-
-### Tipografías
-- **GET All**: `http://localhost:8080/api/tipografias`
-- **GET by ID**: `http://localhost:8080/api/tipografias/{id}`
-- **POST**: `http://localhost:8080/api/tipografias`
-- **PUT**: `http://localhost:8080/api/tipografias/{id}`
-- **DELETE**: `http://localhost:8080/api/tipografias/{id}`
-
-## Archivos Creados/Modificados
-
-### Archivos Nuevos
-- `src/main/java/com/miproyecto/backend/model/Artista.java`
-- `src/main/java/com/miproyecto/backend/model/Peso.java`
-- `src/main/java/com/miproyecto/backend/model/Tipografia.java`
-- `src/main/java/com/miproyecto/backend/model/CategoriaTipografia.java`
-- `src/main/java/com/miproyecto/backend/model/CategoriaTipografiaConverter.java`
-- `src/main/java/com/miproyecto/backend/repository/ArtistaRepository.java`
-- `src/main/java/com/miproyecto/backend/repository/PesoRepository.java`
-- `src/main/java/com/miproyecto/backend/repository/TipografiaRepository.java`
-- `src/main/java/com/miproyecto/backend/controller/TipografiaController.java`
-
-### Archivos Modificados
-- `src/main/resources/application.properties` - Configuración de base de datos y puerto
-
-## Estado Actual
-✅ Aplicación Spring Boot corriendo correctamente en puerto 8080
-✅ Conexión a MySQL establecida y funcional
-✅ Tablas creadas automáticamente por Hibernate (ddl-auto=update)
-✅ API de Tipografías disponible
-✅ Conversión de enum con espacios implementada correctamente
-✅ Listo para pruebas con Thunder Client
+- Unificar el manejo de errores HTTP y agregar pruebas automatizadas.
+- Incorporar migraciones versionadas para cambios del esquema.
+- Completar reglas y servicios de compra, pago, descarga y autenticación antes de habilitar esos flujos.
+- Revisar la configuración de secretos, SQL logging, CORS y seguridad para cada entorno.
