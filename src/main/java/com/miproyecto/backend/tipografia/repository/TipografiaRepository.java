@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 
 public interface TipografiaRepository extends JpaRepository<Tipografia, Long> {
+    boolean existsByArtista_ArtistaId(Long artistaId);
+
     @Override
     @EntityGraph(attributePaths = {"categoria", "artista"})
     List<Tipografia> findAll();
