@@ -8,6 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "pais")
@@ -20,6 +22,7 @@ public class Pais {
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "codigo_iso", nullable = false, length = 2, unique = true)
     private String codigoIso;
 
