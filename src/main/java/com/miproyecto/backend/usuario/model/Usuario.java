@@ -1,5 +1,6 @@
 package com.miproyecto.backend.usuario.model;
 
+import com.miproyecto.backend.ciudad.model.Ciudad;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
@@ -9,11 +10,13 @@ public class Usuario {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "usuario_id") private Long usuarioId;
     @Column(name = "nombre", nullable = false, length = 100) private String nombre;
+    @Column(name = "apellidos", length = 100) private String apellidos;
+    @Column(name = "username", nullable = false, length = 50) private String username;
     @Column(name = "email", nullable = false, length = 150) private String email;
     @Column(name = "password_hash", nullable = false, length = 255) private String passwordHash;
     @Enumerated(EnumType.STRING) @Column(name = "rol", nullable = false, length = 10) private Rol rol = Rol.CLIENTE;
     @Enumerated(EnumType.STRING) @Column(name = "tipo_cliente", length = 10) private TipoCliente tipoCliente;
-    @Column(name = "ciudad", length = 80) private String ciudad;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "ciudad_id") private Ciudad ciudad;
     @Column(name = "telefono", length = 20) private String telefono;
     @Enumerated(EnumType.STRING) @Column(name = "estado", nullable = false, length = 10) private Estado estado = Estado.ACTIVO;
     @Column(name = "intentos_fallidos", nullable = false) private Short intentosFallidos = 0;
@@ -27,6 +30,10 @@ public class Usuario {
     public void setUsuarioId(Long id) { usuarioId = id; }
     public String getNombre() { return nombre; }
     public void setNombre(String v) { nombre = v; }
+    public String getApellidos() { return apellidos; }
+    public void setApellidos(String v) { apellidos = v; }
+    public String getUsername() { return username; }
+    public void setUsername(String v) { username = v; }
     public String getEmail() { return email; }
     public void setEmail(String v) { email = v; }
     public String getPasswordHash() { return passwordHash; }
@@ -35,8 +42,8 @@ public class Usuario {
     public void setRol(Rol v) { rol = v; }
     public TipoCliente getTipoCliente() { return tipoCliente; }
     public void setTipoCliente(TipoCliente v) { tipoCliente = v; }
-    public String getCiudad() { return ciudad; }
-    public void setCiudad(String v) { ciudad = v; }
+    public Ciudad getCiudad() { return ciudad; }
+    public void setCiudad(Ciudad v) { ciudad = v; }
     public String getTelefono() { return telefono; }
     public void setTelefono(String v) { telefono = v; }
     public Estado getEstado() { return estado; }
